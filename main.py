@@ -183,8 +183,8 @@ def user_olymp_delete(olymp):
     user.name = tmp_user.name
     user.university = tmp_user.university
     user.delta = tmp_user.delta
-    user.olymps_list = tmp_user.olymps_list
-    user.achiv = tmp_user.achiv[:index] + tmp_user.achiv[tmp_index + 1:]
+    user.olymps_list = tmp_user.olymps_list[:index] + tmp_user.olymps_list[tmp_index + 1:]
+    user.achiv = tmp_user.achiv
     db_sess.delete(tmp_user)
     db_sess.add(user)
     db_sess.commit()
@@ -197,7 +197,7 @@ def user_change_delta(delta):
     user.name = tmp_user.name
     user.university = tmp_user.university
     user.delta = delta
-    user.olymps_list =tmp_user.olymps_list
+    user.olymps_list = tmp_user.olymps_list
     user.achiv = tmp_user.achiv
     db_sess.delete(tmp_user)
     db_sess.add(user)
