@@ -69,7 +69,6 @@ def add_university(name, faculty, olmp, subjects):
 
 
 def user_university_add(university):
-    global db_sess
     index = university.find('(')
     index2 = university.find(')')
     tmp_sl = university[index + 1:index2]
@@ -113,9 +112,12 @@ def user_university_delete(univers):
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     tmp_user_univer = tmp_user.university
     index = tmp_user_univer.find(univers)
+    if index == -1:
+        print(f"{univers} Такого университет нет в списке.")
+        return
     tmp_index = index
     alph = ['abcdefghijklmnopqrstuvwxyz']
-    while tmp_user_univer[tmp_index] != ')':
+    while tmp_index < len(tmp_user_univer) - 1 and tmp_user_univer[tmp_index] != ')':
         tmp_index += 1
     while tmp_index < len(tmp_user_univer) - 1 and not (tmp_user_univer[tmp_index] in alph):
         tmp_index += 1
@@ -133,22 +135,73 @@ def user_university_delete(univers):
 
 
 def user_change_achiv(achv):
-    pass
+    tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
+    user = User()
+    user.name = tmp_user.name
+    user.university = tmp_user.university
+    user.delta = tmp_user.delta
+    user.olymps_list = tmp_user.olymps_list
+    user.achiv = achv
+    db_sess.delete(tmp_user)
+    db_sess.add(user)
+    db_sess.commit()
 
 
 def user_add_olymp(olymp):
-    pass
-def user_olymp_delete(univers):
-    pass
+    tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
+    user = User()
+    user.name = tmp_user.name
+    user.university = tmp_user.university
+    user.delta = tmp_user.delta
+    user.olymps_list = f"{tmp_user.olymps_list}, {olymp}"
+    user.achiv = tmp_user.achiv
+    db_sess.delete(tmp_user)
+    db_sess.add(user)
+    db_sess.commit()
 
-def user_change_delta(delta, olymp):
-    pass
+def user_olymp_delete(olymp):
+    tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
+    index = tmp_user.olymps_list.find(olymp)
+    if index == -1:
+        print(f"{olymp} Такой олимпиады нет в списке.")
+        return
+    tmp_index = index
+    while tmp_index < len(tmp_user.olymps_list) - 1 and tmp_user.olymps_list[tmp_index] != ',':
+        tmp_index += 1
+    user = User()
+    user.name = tmp_user.name
+    user.university = tmp_user.university
+    user.delta = tmp_user.delta
+    user.olymps_list = tmp_user.olymps_list
+    user.achiv = tmp_user.achiv[:index] + tmp_user.achiv[tmp_index + 1:]
+    db_sess.delete(tmp_user)
+    db_sess.add(user)
+    db_sess.commit()
+
+def user_change_delta(delta):
+    tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
+    user = User()
+    user.name = tmp_user.name
+    user.university = tmp_user.university
+    user.delta = delta
+    user.olymps_list =tmp_user.olymps_list
+    user.achiv = tmp_user.achiv
+    db_sess.delete(tmp_user)
+    db_sess.add(user)
+    db_sess.commit()
 
 def get_university():
-    pass
+    sp = []
+    for univer in db_sess.query(University).filter():
+        sp.append(univer.name)
+    return sp
+
 
 def get_olymp():
-    pass
+    sp = []
+    for olymp in db_sess.query(Olymps).filter():
+        sp.append(olymp.name)
+    return sp
 
 def delete_all():
     for i in db_sess.query(Olymps).filter():
