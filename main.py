@@ -260,3 +260,5 @@ def start(name_user):
     print("User")
     for usr in db_sess.query(User).filter():
         print(usr.name, usr.university, usr.delta, usr.olymps_list, usr.achiv)
+
+    #app.run()
