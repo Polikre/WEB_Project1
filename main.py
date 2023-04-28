@@ -240,6 +240,7 @@ def need_get_olymp():
     return sp
 
 def start(name_user):
+    delete_all()
     global cur_user
     cur_user = name_user
     Ol = [('', 1, 1, 1000, ''), ('Всерос по инфе', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkf', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkjjjk', 13, 12, 2024, 'БВИ в любой ВУЗ')]
