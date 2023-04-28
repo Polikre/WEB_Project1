@@ -1,12 +1,18 @@
 # Импортируем необходимые классы.
 import logging
 import datetime
-from telegram.ext import Application, MessageHandler, filters
+from telegram.ext import Application, MessageHandler, ConversationHandler, filters
 from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
 from random import randint
 
 # Запускаем логгирование
+
+name = ""
+spis_facult = ["1", "2", "3"]
+spis_vyz = ["МГУ", "МФТИ", "МИФИ", "ВШЭ"]
+spis_need_olymp = ["Всерос"]
+spis_olymp = ["Всероссийская олимпиада школьников"]
 
 error_DB = "ERROR. Database not available. Please, write about this Exception to the number 89151771271"
 # ссылка на группу с нами под названием developers
@@ -142,25 +148,105 @@ async def _main_(update, context):
     )
 
 
-async def add_OLYMP(update, context):
-    # send_to_the_DB(key)
-    pass
+# --------------------------------------------------------------------------------------------------
 
+
+async def add_OLYMP(update, context):
+    await update.message.reply_text("Напиши олимпиаду, в которой хочешь участвовать")
+    return 1
+
+
+async def add_OLYMP_2(update, context):
+    olymp = update.message.text
+    if olymp in spis_olymp:
+        # добавление вуза в БД
+        if olymp not in spis_need_olymp:
+            await update.message.reply_text(
+                "Добавлена олимпиада, не влияющая на поступление в нужный вуз. Чтобы удалить её, нажми /del_OLYMP, чтобы поставить напоминание, нажми /change_DELTA")
+        else:
+            await update.message.reply_text(
+                "Добавлена нужная тебе олимпиада. Чтобы удалить её, нажми /del_OLYMP, чтобы поставить напоминание, нажми /change_DELTA")
+        return ConversationHandler.END
+    else:
+        await update.message.reply_text(
+            "К сожалению, бот не знает о такой олимпиаде. Посмотри список олимпиад, нажав /spis_OLYMP")
+        return ConversationHandler.END
+
+
+# ------------------------------------------------------------------------------
+
+async def del_OLYMP(update, context):
+    await update.message.reply_text("Напиши олимпиаду, которую ХОЧЕШЬ УДАЛИТЬ")
+    return 1
+
+
+async def del_OLYMP_2(update, context):
+    olymp = update.message.text
+    if olymp in spis_olymp:
+        # добавление вуза в БД
+        if olymp not in spis_need_olymp:
+            await update.message.reply_text(
+                "Удалена олимпиада, не влияющая на поступление в нужный вуз. Чтобы добавить её, нажми /add_OLYMP")
+        else:
+            await update.message.reply_text(
+                "Удалена нужная тебе олимпиада. Чтобы добавить её, нажми /add_OLYMP, чтобы поставить напоминание, нажми /change_DELTA")
+        return ConversationHandler.END
+    else:
+        await update.message.reply_text(
+            "К сожалению, бот не знает о такой олимпиаде. Посмотри список олимпиад, нажав /spis_OLYMP")
+        return ConversationHandler.END
+
+
+# ------------------------------------------------------------------------------
 
 async def add_VYZ(update, context):
-    pass
+    await update.message.reply_text("Напиши вуз, в который хочешь поступить")
+    return 1
 
 
-async def change_VYZ(update, context):
-    await update.message.reply_html(
-        rf"Загрузка ...",
-        reply_markup=markup_ADD
-    )
+async def add_VYZ_2(update, context):
+    vyz = update.message.text
+    if vyz in spis_vyz:
+        # добавление вуза в БД
+        await update.message.reply_text(
+            "Отлично! Ты можешь написать факультет, на который хочешь поступить, или нажать /stop")
+        return 2
 
+    else:
+        await update.message.reply_text(
+            "К сожалению, бот не знает о таком вузе. Посмотри список вузов, нажав на /spic_VYZ. ")
+        return ConversationHandler.END
+
+
+async def add_VYZ_3(update, context):
+    vyz = update.message.text
+    if vyz in spis_facult:
+        # добавление факультета в БД
+        await update.message.reply_text(
+            "Теперь ты можешь посмотреть олимпиады для выбранных тобой факультетов, нажав /spis_need_olymp")
+        return ConversationHandler.END
+
+    else:
+        await update.message.reply_text(
+            "К сожалению, наш бот не знает о таком факультете. Введи ещё раз или нажми /stop")
+        return 2
+
+
+# ------------------------------------------------------------------------------
 
 async def change_DELTA(update, context):
-    pass
+    await update.message.reply_text(
+        "Напиши название олимпиады, восклицательный знак и время, в которое нужно о ней напомнить")
+    return 1
 
+
+async def change_DELTA_2(update, context):
+    # изменение имени в БД
+    await update.message.reply_text("Бот напомнит об этой олимпиаде!")
+    return ConversationHandler.END
+
+
+# ------------------------------------------------------------------------------
 
 async def change_NAME(update, context):
     pass
@@ -171,7 +257,7 @@ async def spic_VYZ(update, context):
     await update.message.reply_html(
         rf"{user.mention_html()}, ожидайте. Сейчас я выведу список всех ВУЗов ниже:",
     )
-    await update.message.reply_html(rf'{get_spic_olymp(key="test")}')
+    await update.message.reply_html(rf'{get_spic_VYZ(key="test")}')
 
 
 async def spic_OLYMP(update, context):
@@ -240,17 +326,55 @@ def main():
     application.add_handler(CommandHandler("lists", lists))
     application.add_handler(CommandHandler("all", _all_))
 
-    application.add_handler(CommandHandler("add_OLYMP", add_OLYMP))
-    application.add_handler(CommandHandler("add_VYZ", add_VYZ))
+    # application.add_handler(CommandHandler("add_OLYMP", add_OLYMP))
+    # application.add_handler(CommandHandler("add_VYZ", add_VYZ))
 
     # application.add_handler(CommandHandler("add_VYZ", change_VYZ))
-    application.add_handler(CommandHandler("change_DELTA", change_DELTA))
-    application.add_handler(CommandHandler("change_NAME", change_NAME))
+    # application.add_handler(CommandHandler("change_DELTA", change_DELTA))
+    # application.add_handler(CommandHandler("change_NAME", change_NAME))
 
     application.add_handler(CommandHandler("spic_VYZ", spic_VYZ))
     application.add_handler(CommandHandler("spic_OLYMP", spic_OLYMP))
 
     application.add_handler(CommandHandler("USER", USER))
+
+    conv1 = ConversationHandler(
+        entry_points=[CommandHandler('change_DELTA', change_DELTA)],
+        states={
+            1: [MessageHandler(filters.TEXT & ~filters.COMMAND, change_DELTA_2)]
+        },
+        fallbacks=[CommandHandler('stop', stop)]
+    )
+    application.add_handler(conv1)
+
+    conv2 = ConversationHandler(
+        entry_points=[CommandHandler('add_VYZ', add_VYZ)],
+        states={
+            1: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_VYZ_2)],
+            2: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_VYZ_3)]
+        },
+        fallbacks=[CommandHandler('stop', stop)]
+    )
+    application.add_handler(conv2)
+
+    conv3 = ConversationHandler(
+        entry_points=[CommandHandler('del_OLYMP', del_OLYMP)],
+        states={
+            1: [MessageHandler(filters.TEXT & ~filters.COMMAND, del_OLYMP_2)],
+        },
+        fallbacks=[CommandHandler('stop', stop)]
+    )
+    application.add_handler(conv3)
+
+    conv4 = ConversationHandler(
+        entry_points=[CommandHandler('add_OLYMP', add_OLYMP)],
+        states={
+            1: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_OLYMP_2)],
+        },
+        fallbacks=[CommandHandler('stop', stop)]
+    )
+
+    application.add_handler(conv4)
 
     # Запускаем приложение.
     application.run_polling()
