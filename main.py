@@ -239,22 +239,17 @@ def need_get_olymp():
             sp.extend(tmp_univer.olymps_list.split(','))
     return sp
 
-def main():
+def start(name_user):
     global cur_user
-    delete_all()
-    Ol = [('Всерос по инфе', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkf', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkjjjk', 13, 12, 2024, 'БВИ в любой ВУЗ')]
-    unive = [('МФТИ', 'ПМИ', 'Всерос по инфе, kkf', 'Математика, Информатика'), ('МФТИ', 'jkl', 'Всерос по инфе, kkjjjk', 'Математика, Информатика')]
-    usr = [('Карим', "МФТИ(ПМИ)", 2, 'Всерос по инфе', 'Обладаю слепой печатью')]
-    cur_user = 'Карим'
-    add_olymp(*Ol[0])
-    add_olymp(*Ol[1])
-    add_olymp(*Ol[2])
-    add_university(*unive[0])
-    add_university(*unive[1])
+    cur_user = name_user
+    Ol = [('', 1, 1, 1000, ''), ('Всерос по инфе', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkf', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkjjjk', 13, 12, 2024, 'БВИ в любой ВУЗ')]
+    unive = [('', '', '', ''), ('МФТИ', 'ПМИ', 'Всерос по инфе, kkf', 'Математика, Информатика'), ('МФТИ', 'jkl', 'Всерос по инфе, kkjjjk', 'Математика, Информатика')]
+    usr = [(name_user, '', 0, '', '')]
+    for i in Ol:
+        add_olymp(*i)
+    for i in unive:
+        add_university(*i)
     add_user(*usr[0])
-    user_university_add('МФТИ(jkl)')
-    print(need_get_olymp())
-    user_university_delete('МФТИ')
     print("Olymps")
     for ol in db_sess.query(Olymps).filter():
         print(ol.name, ol.date, ol.what_give)
@@ -266,7 +261,3 @@ def main():
         print(usr.name, usr.university, usr.delta, usr.olymps_list, usr.achiv)
 
     #app.run()
-
-
-if __name__ == '__main__':
-    main()
