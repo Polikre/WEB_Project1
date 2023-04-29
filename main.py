@@ -4,36 +4,17 @@ import datetime
 from data.users import User
 from data.olymps import Olymps
 from data.university import University
+from data.olympiads_bd import olympiads
+from data.university_bd import universities
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 db_session.global_init("db/olymps_university.db")
 db_sess = db_session.create_session()
-cur_user = 'Karim'
 
 
 def add_user(name, university, delta, olp, achv):
-    index = university.find('(')
-    index2 = university.find(')')
-    tmp_sl = university[index + 1:index2]
-    unir = university[:index]
-    if db_sess.query(University).filter(University.name == unir).count() < 1:
-        print(f"{unir} Такого университет нет в списке.")
-        return
-    for tt in tmp_sl.split(','):
-        tt = tt.replace(' ', '')
-        fl = 0
-        for un in db_sess.query(University).filter(University.name == unir):
-            if un.faculty == tt:
-                fl = 1
-        if not fl:
-            print(f"{tt} Такого факультета нет в {unir}.")
-            return
-    for i in olp.split(','):
-        if db_sess.query(Olymps).filter(Olymps.name == i).count() < 1:
-            print(f"{i} Такой олимпиады нет в списке.")
-            return
     user = User()
     user.name = name
     user.university = university
@@ -69,7 +50,7 @@ def add_university(name, faculty, olmp, subjects):
     db_sess.commit()
 
 
-def user_university_add(university):
+def user_university_add(university, cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
         return
     index = university.find('(')
@@ -111,8 +92,9 @@ def user_university_add(university):
     db_sess.add(user)
     db_sess.commit()
 
-def user_university_delete(univers):
+def user_university_delete(univers, cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
         return
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     tmp_user_univer = tmp_user.university
@@ -139,8 +121,9 @@ def user_university_delete(univers):
 
 
 
-def user_change_achiv(achv):
+def user_change_achiv(achv, cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
         return
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     user = User()
@@ -154,8 +137,9 @@ def user_change_achiv(achv):
     db_sess.commit()
 
 
-def user_add_olymp(olymp):
+def user_add_olymp(olymp, cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
         return
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     user = User()
@@ -168,8 +152,9 @@ def user_add_olymp(olymp):
     db_sess.add(user)
     db_sess.commit()
 
-def user_olymp_delete(olymp):
+def user_olymp_delete(olymp, cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
         return
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     index = tmp_user.olymps_list.find(olymp)
@@ -189,8 +174,9 @@ def user_olymp_delete(olymp):
     db_sess.add(user)
     db_sess.commit()
 
-def user_change_delta(delta):
+def user_change_delta(delta, cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
         return
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     user = User()
@@ -203,32 +189,43 @@ def user_change_delta(delta):
     db_sess.add(user)
     db_sess.commit()
 
-def get_university():
+def get_all_university():
     sp = []
     for univer in db_sess.query(University).filter():
         sp.append(univer.name)
     return sp
 
 
-def get_olymp():
+def get_all_olymp():
     sp = []
     for olymp in db_sess.query(Olymps).filter():
         sp.append(olymp.name)
     return sp
 
-def delete_all():
+def delete_all_olymps():
     for i in db_sess.query(Olymps).filter():
         db_sess.delete(i)
         db_sess.commit()
+
+def delete_all_university():
     for i in db_sess.query(University).filter():
         db_sess.delete(i)
         db_sess.commit()
+
+def delete_all_users():
     for i in db_sess.query(User).filter():
         db_sess.delete(i)
         db_sess.commit()
 
-def need_get_olymp():
+def delete_all():
+    delete_all_olymps()
+    delete_all_university()
+    delete_all_users()
+
+
+def need_get_olymp(cur_user):
     if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
         return
     tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
     sp = []
@@ -239,26 +236,20 @@ def need_get_olymp():
             sp.extend(tmp_univer.olymps_list.split(','))
     return sp
 
-def start(name_user):
-    delete_all()
-    global cur_user
-    cur_user = name_user
-    Ol = [('', 1, 1, 1000, ''), ('Всерос по инфе', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkf', 13, 12, 2024, 'БВИ в любой ВУЗ'), ('kkjjjk', 13, 12, 2024, 'БВИ в любой ВУЗ')]
-    unive = [('', '', '', ''), ('МФТИ', 'ПМИ', 'Всерос по инфе, kkf', 'Математика, Информатика'), ('МФТИ', 'jkl', 'Всерос по инфе, kkjjjk', 'Математика, Информатика')]
-    usr = [(name_user, '', 0, '', '')]
-    for i in Ol:
+def user_info(cur_user):
+    if db_sess.query(User).filter(User.name == cur_user).count() < 1:
+        print(f'Такого пользователя не существует {cur_user}')
+        return
+    tmp_user = db_sess.query(User).filter(User.name == cur_user)[0]
+    return (tmp_user.name, tmp_user.university, tmp_user.delta, tmp_user.achiv, tmp_user.olymps_list)
+
+def start(cur_user):
+    delete_all_olymps()
+    delete_all_university()
+    usr = [(cur_user, '', 0, '', '')]
+    for i in olympiads:
         add_olymp(*i)
-    for i in unive:
+    for i in universities:
         add_university(*i)
     add_user(*usr[0])
-    print("Olymps")
-    for ol in db_sess.query(Olymps).filter():
-        print(ol.name, ol.date, ol.what_give)
-    print("University")
-    for univer in db_sess.query(University).filter():
-        print(univer.name, univer.olymps_list, univer.subjects, univer.faculty)
-    print("User")
-    for usr in db_sess.query(User).filter():
-        print(usr.name, usr.university, usr.delta, usr.olymps_list, usr.achiv)
-
     #app.run()
